@@ -1,0 +1,7 @@
+"nstack"
+{
+	"base"		    "sandbox"
+	"title"		    "nstack"
+	"category"	    "other"
+	"menusystem"	"1"
+}
