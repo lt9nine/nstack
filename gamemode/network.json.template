@@ -1,0 +1,23 @@
+{
+    "servers": {
+        "es-1": {
+            "name": "nstack server 1",
+            "host": "187.243.223.175",
+            "port": 27010,
+            "settings": {
+                "map": "gm_flatgrass",
+                "slots": 64
+            }
+        },
+
+        "es-2": {
+            "name": "nstack server 2",
+            "host": "187.243.223.175",
+            "port": 27012,
+            "settings": {
+                "map": "gm_flatgrass",
+                "slots": 64
+            } 
+        }
+    }
+}
