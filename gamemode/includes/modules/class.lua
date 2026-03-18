@@ -26,6 +26,6 @@ local function isClass( obj )
     return obj and istable( obj ) and obj._Class
 end
 
-nstack.class.TableToClass = Classify
-nstack.class.New = Classify
-nstack.class.isClass = isClass
+TableToClass = Classify
+Class = Classify
+isClass = isClass
