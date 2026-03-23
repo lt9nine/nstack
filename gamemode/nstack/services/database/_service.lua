@@ -5,6 +5,7 @@ local service = {
     author = "https://github.com/lt9nine" ,
     settings = {} ,
     files = {
-        [ 1 ] = { fileName = "database.lua" , environment = "server" }
+        [ 1 ] = { fileName = "credentials.lua" , environment = "server" } ,
+        [ 2 ] = { fileName = "database.lua" , environment = "server" }
     }
 }
