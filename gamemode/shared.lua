@@ -6,6 +6,8 @@ GM.Initialized = false
 
 if SERVER then require( "mysqloo" ) end
 
+require( "class" )
+
 DeriveGamemode( "sandbox" )
 DEFINE_BASECLASS( "gamemode_sandbox" )
 

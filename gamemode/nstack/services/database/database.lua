@@ -29,6 +29,8 @@ function service._init()
     function databaseObject.onConnected()
         removeInitBot()
         nstack.core.log.info( "services :: " .. service.name , "database connection established successfully!" )
+        service.orm.setHandler( service.orm.MysqlHandler() )
+        nstack.core.log.info( "services :: " .. service.name , "ORM handler initialized!" )
     end
 
     function databaseObject.onConnectionFailed( err )

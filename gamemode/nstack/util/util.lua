@@ -1,31 +1,33 @@
+local utilFolder = GM.FolderName .. "/gamemode/nstack/util"
+
 -- Auto-include all files from util/shared
 local sharedUtilCount = 0
-local sharedFiles = file.Find( GM.FolderName .. "/gamemode/nstack/util/shared/*.lua" , "LUA" )
-for _, filename in ipairs( sharedFiles ) do
-    AddCSLuaFile( GM.FolderName .. "/gamemode/nstack/util/shared/" .. filename )
-    nstack.core.include( "shared/" .. filename , "shared" )
+local sharedFiles = file.Find( utilFolder .. "/shared/*.lua" , "LUA" )
+for _ , fileName in ipairs( sharedFiles ) do
+    AddCSLuaFile( GM.FolderName .. "/gamemode/nstack/util/shared/" .. fileName )
+    include( "shared/" .. fileName )
     sharedUtilCount = sharedUtilCount + 1
 end
 
 -- Auto-include all files from util/client
-if CLIENT then
-    local clientUtilCount = 0
-    local clientFiles = file.Find( GM.FolderName .. "/gamemode/nstack/util/client/*.lua" , "LUA" )
-    for _, filename in ipairs( clientFiles ) do
-        AddCSLuaFile( "nstack/util/client/" .. filename )
-        nstack.core.include( "client/" .. filename , "client" )
-        clientUtilCount = clientUtilCount + 1
+local clientUtilCount = 0
+local clientFiles = file.Find( utilFolder .. "/client/*.lua" , "LUA" )
+for _ , fileName in ipairs( clientFiles ) do
+    AddCSLuaFile( GM.FolderName .. "/gamemode/nstack/util/client/" .. fileName )
+    if CLIENT then
+        include( "client/" .. fileName )
     end
-    nstack.core.log.info( "util" , "Included " .. clientUtilCount .. " client utilities and " .. sharedUtilCount .. " shared utilities" )
+    clientUtilCount = clientUtilCount + 1
 end
 
 -- Auto-include all files from util/server
-if SERVER then
-    local serverUtilCount = 0
-    local serverFiles = file.Find( GM.FolderName .. "/gamemode/nstack/util/server/*.lua" , "LUA" )
-    for _, filename in ipairs( serverFiles ) do
-        nstack.core.include( "server/" .. filename , "server" )
-        serverUtilCount = serverUtilCount + 1
+local serverUtilCount = 0
+local serverFiles = file.Find( utilFolder .. "/server/*.lua" , "LUA" )
+for _ , fileName in ipairs( serverFiles ) do
+    if SERVER then
+        include( "server/" .. fileName )
     end
-    nstack.core.log.info( "util" , "Included " .. serverUtilCount .. " server utilities and " .. sharedUtilCount .. " shared utilities" )
+    serverUtilCount = serverUtilCount + 1
 end
+
+nstack.core.log.info( "util" , "Included " .. sharedUtilCount .. " shared, " .. clientUtilCount .. " client, " .. serverUtilCount .. " server utilities" )
