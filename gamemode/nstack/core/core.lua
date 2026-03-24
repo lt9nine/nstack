@@ -1,10 +1,4 @@
-AddCSLuaFile( "log.lua" ) -- shared
-include( "log.lua" )
+AddCSLuaFile( "log.lua" )
+include( "log.lua" ) -- shared
 
-AddCSLuaFile( "include.lua" ) -- shared
-include( "include.lua" )
-
-AddCSLuaFile( "class.lua" ) -- shared
-include( "class.lua" )
-
-include( "lifecycle.lua" ) -- server
+if SERVER then include( "identifier.lua" ) end -- server
