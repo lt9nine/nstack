@@ -4,6 +4,8 @@ GM.Website = "https://github.com/lt9nine/nstack"
 GM.Version = "dev-0.1" -- GitHub version checker in the future?
 GM.Initialized = false
 
+if SERVER then require( "mysqloo" ) end
+
 DeriveGamemode( "sandbox" )
 DEFINE_BASECLASS( "gamemode_sandbox" )
 
@@ -33,11 +35,18 @@ include( "nstack/services/service.lua" )
 function nstack.core.initialize()
     if table.Count( nstack.services ) > 0 then
         for name , service in pairs( nstack.services ) do
-            if service.status == "stopped" then
-                service._init()
+            if type( service ) == "table" and service._init then
+                if service.status == "stopped" then
+                    local env = service.environment
+                    if env == "shared"
+                    or ( env == "server" and SERVER )
+                    or ( env == "client" and CLIENT ) then
+                        service._init()
+                    end
+                end
             end
         end
     end
 end
 
---if CLIENT then nstack.core.initialize() end
+if CLIENT then nstack.core.initialize() end

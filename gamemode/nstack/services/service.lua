@@ -5,6 +5,17 @@ local serviceCount = 0
 function nstack.services.register( service )
     if service and service.name and service.files then
         if table.Count( service.files ) > 0 then
+            if service.environment then
+                for _ , fileEntry in ipairs( service.files ) do
+                    if fileEntry.environment ~= service.environment then
+                        nstack.core.log.error( "services" , "service " .. service.name .. " is environment '" .. service.environment .. "' but file '" .. ( fileEntry.file or "?" ) .. "' has environment '" .. ( fileEntry.environment or "?" ) .. "', skipping..." )
+                        return false
+                    end
+                end
+            else
+                nstack.core.log.error( "services" , "service " .. service.name .. " has no environment set, skipping..." )
+                return false
+            end
             nstack.services[ service.name ] = service
             nstack.services[ service.name ].status = "stopped" -- default
             nstack.core.log.debug( "services" , "registered service " .. service.name .. " with " .. table.Count( service.files ) .. " files." )
@@ -16,10 +27,6 @@ function nstack.services.register( service )
 
     nstack.core.log.error( "services" , "service configuration faulty, skipping..." )
     return false
-end
-
-function nstack.services.reportStatus( status )
-
 end
 
 for _ , folderName in ipairs( folders ) do

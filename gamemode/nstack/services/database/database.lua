@@ -1,31 +1,40 @@
 local service = nstack.services[ "database" ]
 
 function service._init()
-    require( "mysqloo" )
-
     nstack.core.log.trace( "services :: " .. service.name , "triggered start of service" )
+
+    if not mysqloo then
+        nstack.core.log.warn( "services :: " .. service.name , "binary module 'mysqloo' not started or missing, skipping start..." )
+        return false
+    end
 
     if nstack.services[ "database" ].status == "running" then
         nstack.core.log.warn( "services :: " .. service.name , "service already running, skipping start..." )
         return false
     end
 
-    if not service.settings or not service.settings.host or not service.settings.port or not service.settings.user or not service.settings.pass or not service.settings.name then
+    if not service.credentials or not service.credentials.host or not service.credentials.port or not service.credentials.user or not service.credentials.pass or not service.credentials.name then
         nstack.core.log.warn( "services :: " .. service.name , "No credentials found for database, skipping start..." )
         return false
     end
 
-    local databaseObject = mysqloo.connect( settings.host , settings.user , settings.pass , settings.name , settings.port )
+    local databaseObject = mysqloo.connect( service.credentials.host , service.credentials.user , service.credentials.pass , service.credentials.name , service.credentials.port )
 
-    function databaseObject.onConnected()
-        nstack.core.log.info( "services :: " .. service.name , "database connection established successfully!" )
-        nstack.core.lifecycle.reportServiceReady( service.name )
+    local initBot = player.CreateNextBot( "nstack_db_init" )
+
+    local function removeInitBot()
+        if IsValid( initBot ) then initBot:Kick( "" ) end -- Create "Player" to kickstart the Think Hook! Outsource in the future?
     end
 
-    function databaseObject.onConnectionFailed( error )
+    function databaseObject.onConnected()
+        removeInitBot()
+        nstack.core.log.info( "services :: " .. service.name , "database connection established successfully!" )
+    end
+
+    function databaseObject.onConnectionFailed( err )
+        removeInitBot()
         nstack.core.log.error( "services :: " .. service.name , "database connection failed!" )
         nstack.services[ "database" ].status = "stopped"
-        return false
     end
 
     function service.query( qtext )
@@ -58,6 +67,4 @@ function service._init()
     databaseObject:connect()
 
     nstack.services[ "database" ].db = databaseObject
-
-    return true
 end
