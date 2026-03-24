@@ -75,6 +75,68 @@ orm.getModel( "Player" ):find():where( { score = 100 } ):run()
 
 ---
 
+## WebSocket
+
+The websocket service connects to [nhub](https://github.com/lt9nine/nhub) for multi-server communication. It requires the [GWSockets](https://github.com/FredyH/GWSockets) binary module.
+
+**Setup:** add `websocket_key` to your server's entry in `network.json` and set the nhub `host`/`port` in `services/websocket/_service.lua` settings.
+
+**Sending messages:**
+
+```lua
+local ws = nstack.services[ "websocket" ]
+
+-- broadcast to all servers (optional channel)
+ws.broadcast( { message = "hello" } )
+ws.broadcast( { message = "hello" } , "mychannel" )
+
+-- send directly to a specific server
+ws.direct( "es-2" , { message = "hello from es-1" } )
+
+-- RPC call: send a request and handle the response by matching the id
+local rpcId = "req-" .. util.CRC( tostring( SysTime() ) )
+
+ws.rpc( "es-2" , rpcId , { method = "getPlayerCount" } )
+
+hook.Add( "NStack:WebSocket:RPCResponse" , rpcId , function( msg )
+    if msg.id ~= rpcId then return end
+    hook.Remove( "NStack:WebSocket:RPCResponse" , rpcId )
+    print( "player count on es-2: " , msg.payload.result )
+end )
+
+-- respond to an incoming RPC from another server
+hook.Add( "NStack:WebSocket:RPC" , "myhandler" , function( msg )
+    if msg.payload.method == "getPlayerCount" then
+        ws.respond( msg.id , { result = #player.GetAll() } )
+    end
+end )
+
+-- subscribe / unsubscribe from a channel
+ws.subscribe( "mychannel" )
+ws.unsubscribe( "mychannel" )
+```
+
+**Receiving messages:**
+
+```lua
+-- all incoming messages
+hook.Add( "NStack:WebSocket:Message" , "myhandler" , function( msg )
+    print( msg.from , msg.type )
+end )
+
+-- typed hooks
+hook.Add( "NStack:WebSocket:Broadcast"    , "myhandler" , function( msg ) end )
+hook.Add( "NStack:WebSocket:Direct"       , "myhandler" , function( msg ) end )
+hook.Add( "NStack:WebSocket:RPC"          , "myhandler" , function( msg ) end )
+hook.Add( "NStack:WebSocket:RPCResponse"  , "myhandler" , function( msg ) end )
+hook.Add( "NStack:WebSocket:Disconnected" , "myhandler" , function() end )
+hook.Add( "NStack:WebSocket:Error"        , "myhandler" , function( err ) end )
+```
+
+`msg` is the decoded JSON envelope from nhub — it always contains `type` and `from`, and optionally `payload`, `channel`, `id`, and `ts`.
+
+---
+
 ## Contributing
 
 Contributions are welcome. Before opening a PR, read the [conventions guide](conventions.md) — it defines mandatory style and architecture rules that all code must follow.
@@ -91,4 +153,5 @@ nstack is free to use and modify. **Commercial redistribution of nstack itself i
 
 - [Conventions & Style Guide](conventions.md)
 - [GitHub](https://github.com/lt9nine/nstack)
+- [nhub](https://github.com/lt9nine/nhub)
 - Documentation — coming via GitHub Pages

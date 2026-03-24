@@ -5,6 +5,7 @@ GM.Version = "dev-0.1" -- GitHub version checker in the future?
 GM.Initialized = false
 
 if SERVER then require( "mysqloo" ) end
+if SERVER then require( "gwsockets" ) end
 
 require( "class" )
 
