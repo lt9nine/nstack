@@ -2,7 +2,7 @@ local serviceFolder = GM.FolderName .. "/gamemode/nstack/services"
 local files , folders = file.Find( serviceFolder .. "/*" , "LUA" )
 local serviceCount = 0
 
-function nstack.core.services.register( service )
+function nstack.services.register( service )
     if service and service.name and service.files then
         if table.Count( service.files ) > 0 then
             nstack.services[ service.name ] = service
@@ -18,7 +18,7 @@ function nstack.core.services.register( service )
     return false
 end
 
-function nstack.core.services.reportStatus( status )
+function nstack.services.reportStatus( status )
 
 end
 
@@ -28,7 +28,7 @@ for _ , folderName in ipairs( folders ) do
         AddCSLuaFile( serviceFolder .. "/" .. folderName .. "/_service.lua" )
         local service = include( folderName .. "/_service.lua" )
 
-        if nstack.core.services.register( service ) then -- cancel here if service is faulty
+        if nstack.services.register( service ) then -- cancel here if service is faulty
             serviceCount = serviceCount + 1
             for _ , fileEntry in ipairs( service.files ) do
                 if fileEntry.file and fileEntry.environment then

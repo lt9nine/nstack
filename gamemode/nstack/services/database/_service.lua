@@ -9,3 +9,5 @@ local service = {
         [ 2 ] = { fileName = "database.lua" , environment = "server" }
     }
 }
+
+return service

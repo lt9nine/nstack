@@ -31,8 +31,13 @@ include( "nstack/services/service.lua" )
 -- server and client startup obviously run async
 -- ! CANT' run AddCSLuaFile() or include() operations !
 function nstack.core.initialize()
-    -- starting of services, modules and sub-systems
-    GM.Initialized = true
+    if table.Count( nstack.services ) > 0 then
+        for name , service in pairs( nstack.services ) do
+            if service.status == "stopped" then
+                service._init()
+            end
+        end
+    end
 end
 
 --if CLIENT then nstack.core.initialize() end
