@@ -65,13 +65,13 @@ function ws._init( settings )
         hook.Run( "nstack.infra.websocket.Message" , msg )
 
         if msg.type == "broadcast" then
-            hook.Run( "nstack.infra.websocket.Broadcast" , msg )
+            hook.Run( "nstack.infra.websocket.broadcast" , msg )
         elseif msg.type == "direct" then
-            hook.Run( "nstack.infra.websocket.Direct" , msg )
+            hook.Run( "nstack.infra.websocket.direct" , msg )
         elseif msg.type == "rpc" then
-            hook.Run( "nstack.infra.websocket.RPC" , msg )
+            hook.Run( "nstack.infra.websocket.rpc" , msg )
         elseif msg.type == "rpc_response" then
-            hook.Run( "nstack.infra.websocket.RPCResponse" , msg )
+            hook.Run( "nstack.infra.websocket.rpc_response" , msg )
         end
     end
 
