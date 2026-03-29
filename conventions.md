@@ -107,6 +107,7 @@ _G.nstack = {}
 ```lua
 _G.nstack = {
     core     = {} ,
+    infra    = {} ,
     modules  = {} ,
     services = {} ,
     util     = {} ,
@@ -125,29 +126,50 @@ _G.nstack = {
 - Provide system hooks
 - Provide logging
 
-### 3.3 `nstack.modules`
+### 3.3 `nstack.infra`
+**Purpose**
+- Provides low-level I/O drivers required by the framework itself
+- Loaded statically by core before services, server-side only
+- Not a dynamic registry — infra components are always present
+
+**Responsibilities**
+- Database connection and ORM (`nstack.infra.database`)
+- WebSocket connection to nhub (`nstack.infra.websocket`)
+- Configuration read from `network.json` → `global_settings`
+
+**Rules**
+- Core and services may both consume infra
+- Infra components are initialized via `_init( config )` called from `nstack.core.initialize()`
+- Config comes from `network.json` `global_settings`, never hardcoded
+
+```lua
+nstack.infra.database.orm.define( "User" , attributes )
+nstack.infra.database.db:query( "SELECT 1" )
+nstack.infra.websocket.broadcast( payload , "global" )
+```
+
+### 3.4 `nstack.modules`
 **Purpose**
 - Encapsulates optional feature packages
 - Usually gameplay-related or server extensions
 - Modules can depend on services but not tightly coupled to each other
 
-### 3.4 `nstack.services`
+### 3.5 `nstack.services`
 **Purpose**
-- Provides system-wide functionality
-- Singleton-style, always available
+- Provides domain-level functionality (e.g. chat, admin, players)
+- Singleton-style, always available once initialized
 - Independent of modules
 
 **Rules**
-- No game-specific logic
+- No raw I/O — use `nstack.infra` for database/websocket
 - Always active, long-lived
 - Can be consumed by modules
 
 ```lua
-nstack.services[ "database" ].orm.define( "User" , attributes )
-nstack.services[ "database" ].db:query( "SELECT 1" )
+nstack.services[ "chat" ].send( player , message )
 ```
 
-### 3.5 `nstack.util`
+### 3.6 `nstack.util`
 **Purpose**
 - Pure helper functions
 - Stateless, no lifecycle
@@ -205,10 +227,9 @@ Each service lives in its own folder under `nstack/services/<name>/`:
 
 ```
 services/
-  database/
+  chat/
     _service.lua     ← descriptor, loaded first
-    credentials.lua
-    database.lua
+    chat.lua
     ...
 ```
 
@@ -218,14 +239,13 @@ The `environment` of the service and all its files must match.
 
 ```lua
 local service = {
-    name        = "database" ,
+    name        = "chat" ,
     description = "..." ,
     version     = "1.0.0" ,
     author      = "..." ,
     environment = "server" ,
     files = {
-        [ 1 ] = { file = "credentials.lua" , environment = "server" } ,
-        [ 2 ] = { file = "database.lua"    , environment = "server" } ,
+        [ 1 ] = { file = "chat.lua" , environment = "server" } ,
     }
 }
 
@@ -239,7 +259,7 @@ Define `service._init()` in the main service file.
 The service table IS the public interface — no separate global.
 
 ```lua
-local service = nstack.services[ "database" ]
+local service = nstack.services[ "chat" ]
 
 function service._init()
     nstack.core.log.trace( "services :: " .. service.name , "starting..." )
@@ -264,25 +284,47 @@ nstack.core.log.error( category , message )
 nstack.core.log.fatal( category , message )
 ```
 
-### 6.3 Category Format
+### 6.3 When to Use Each Level
+
+| Level   | When to use |
+|---------|-------------|
+| `trace` | High-frequency internals: individual SQL queries, individual websocket messages, internal function entry points. Never useful in production. |
+| `debug` | Step-by-step flow within an operation: "connecting to...", "opening connection", config values being applied. Useful during development, off in production. |
+| `info`  | Significant lifecycle milestones an operator always wants to see: service started, connection established, server identified. Low frequency, always meaningful. |
+| `warn`  | The system handled it gracefully but something was off: optional component missing (skipping), already running (skipping), unexpected disconnect. No action required. |
+| `error` | An operation failed and the system cannot complete it. The framework continues running. Query failed, malformed data received, runtime websocket error. |
+| `fatal` | The framework cannot function. **Always followed by a server shutdown.** Reserved for unrecoverable startup failures — missing `network.json`, failed database connection, failed websocket connection. |
+
+**`fatal` must always be paired with a shutdown:**
+```lua
+nstack.core.log.fatal( "infra :: database" , "connection failed — shutting down" )
+game.ConsoleCommand( "quit\n" )
+```
+
+### 6.4 Category Format
 Use `::` to separate layers within the category string.
 ```lua
-nstack.core.log.info( "services :: database" , "connected" )
-nstack.core.log.trace( "services :: database :: orm" , sql )
+nstack.core.log.info( "infra :: database" , "connected" )
+nstack.core.log.trace( "infra :: database :: orm" , sql )
+nstack.core.log.info( "infra :: websocket" , "authenticated" )
+nstack.core.log.trace( "services :: chat" , "message sent" )
 ```
 
 ## 7. Network Strings
 ### 7.1 Format
+All lowercase, colon-separated segments.
 ```
-nstack:<layer>:<module>:<action>
+nstack:<layer>:<subsystem>:<action>
 ```
+
+`<subsystem>` can be omitted when the layer alone is sufficient context.
 
 ### 7.2 Examples
 ```lua
 util.AddNetworkString( "nstack:core:ready" )
-util.AddNetworkString( "nstack:module:inventory:sync" )
+util.AddNetworkString( "nstack:infra:websocket:connected" )
+util.AddNetworkString( "nstack:service:chat:message" )
 ```
-`<module>` can be skipped, depending on the layer.
 
 ## 8. Hooks
 ### 8.1 Hook Registration Keys
@@ -297,9 +339,11 @@ end )
 ```
 
 ### 8.2 Custom Hooks (fired by nstack)
+All hook names fired by nstack use lowercase dot-separated identifiers — the same convention as hook registration keys.
 ```lua
-hook.Run( "NStack.Core.Ready" )
-hook.Run( "NStack.Module.Loaded" , moduleName )
+hook.Run( "nstack.initialized" )
+hook.Run( "nstack.infra.websocket.connected" )
+hook.Run( "nstack.service.chat.message" , data )
 ```
 
 ## 9. Control Flow Style

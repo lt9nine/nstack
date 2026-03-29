@@ -1,8 +1,8 @@
-local service = nstack.services[ "database" ]
+local db = nstack.infra.database
 
-service.orm = {}
+db.orm = {}
 
-local ORM = service.orm
+local ORM = db.orm
 
 ---@type Model[]
 ORM.models = {}

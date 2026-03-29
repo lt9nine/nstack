@@ -14,6 +14,7 @@ DEFINE_BASECLASS( "gamemode_sandbox" )
 
 _G.nstack = {
     core = {} ,
+    infra = {} ,
     modules = {} ,
     services = {} ,
     util = {} ,
@@ -24,6 +25,8 @@ include( "nstack/core/core.lua" )
 
 AddCSLuaFile( "nstack/util/util.lua" )
 include( "nstack/util/util.lua" )
+
+if SERVER then include( "nstack/infra/infra.lua" ) end
 
 AddCSLuaFile( "nstack/services/service.lua" )
 include( "nstack/services/service.lua" )
@@ -36,6 +39,14 @@ include( "nstack/services/service.lua" )
 -- server and client startup obviously run async
 -- ! CANT' run AddCSLuaFile() or include() operations !
 function nstack.core.initialize()
+    if SERVER then
+        local gs = nstack.core.global_settings
+        if gs then
+            if gs.database then nstack.infra.database._init( gs.database ) end
+            if gs.websocket then nstack.infra.websocket._init( gs.websocket ) end
+        end
+    end
+
     if table.Count( nstack.services ) > 0 then
         for name , service in pairs( nstack.services ) do
             if type( service ) == "table" and service._init then
@@ -51,7 +62,7 @@ function nstack.core.initialize()
         end
     end
 
-    hook.Run( "NStack.Initialized" )
+    hook.Run( "nstack.initialized" )
 end
 
 if CLIENT then nstack.core.initialize() end

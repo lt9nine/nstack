@@ -1,4 +1,4 @@
-local ORM = nstack.services[ "database" ].orm
+local ORM = nstack.infra.database.orm
 
 ---@enum AttributeType
 ORM.AttributeType = {

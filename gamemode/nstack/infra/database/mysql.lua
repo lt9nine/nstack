@@ -1,5 +1,5 @@
-local service = nstack.services[ "database" ]
-local ORM = nstack.services[ "database" ].orm
+local db  = nstack.infra.database
+local ORM = nstack.infra.database.orm
 
 local function checkReservedWords( input )
     for _ , reserved in pairs( ORM.MysqlHandler.ReservedWords ) do
@@ -76,7 +76,7 @@ ORM.MysqlHandler.ReservedWords = {
 }
 
 function ORM.MysqlHandler:_init()
-    self.database = service.db
+    self.database = db.db
 end
 
 local function buildWhere( model , whereConditions )
@@ -180,11 +180,11 @@ function ORM.MysqlHandler:runFind( query )
     if next( query.sortOrder ) then
         findSql = findSql .. " " .. buildSort( query.model , query.sortOrder )
     end
-    nstack.core.log.trace( "services :: database :: orm" , findSql )
+    nstack.core.log.trace( "infra :: database :: orm" , findSql )
 
     local sqlQuery = self.database:query( findSql )
     sqlQuery.onError = function( _ , err )
-        nstack.core.log.error( "services :: database :: orm" , "Query failed: " .. err )
+        nstack.core.log.error( "infra :: database :: orm" , "Query failed: " .. err )
     end
     sqlQuery:start()
     sqlQuery:wait()
@@ -215,11 +215,11 @@ end
 
 function ORM.MysqlHandler:runAdd( query )
     local addSql = buildAdd( query.model , query.attributes )
-    nstack.core.log.trace( "services :: database :: orm" , addSql )
+    nstack.core.log.trace( "infra :: database :: orm" , addSql )
 
     local sqlQuery = self.database:query( addSql )
     sqlQuery.onError = function( _ , err )
-        nstack.core.log.error( "services :: database :: orm" , "Query failed: " .. err )
+        nstack.core.log.error( "infra :: database :: orm" , "Query failed: " .. err )
     end
     sqlQuery:start()
     sqlQuery:wait()
@@ -230,11 +230,11 @@ function ORM.MysqlHandler:runUpdate( query )
     if next( query.whereConditions ) then
         updateSql = updateSql .. " " .. buildWhere( query.model , query.whereConditions )
     end
-    nstack.core.log.trace( "services :: database :: orm" , updateSql )
+    nstack.core.log.trace( "infra :: database :: orm" , updateSql )
 
     local sqlQuery = self.database:query( updateSql )
     sqlQuery.onError = function( _ , err )
-        nstack.core.log.error( "services :: database :: orm" , "Query failed: " .. err )
+        nstack.core.log.error( "infra :: database :: orm" , "Query failed: " .. err )
     end
     sqlQuery:start()
     sqlQuery:wait()
@@ -245,11 +245,11 @@ function ORM.MysqlHandler:runDelete( query )
     if next( query.whereConditions ) then
         deleteSql = deleteSql .. " " .. buildWhere( query.model , query.whereConditions )
     end
-    nstack.core.log.trace( "services :: database :: orm" , deleteSql )
+    nstack.core.log.trace( "infra :: database :: orm" , deleteSql )
 
     local sqlQuery = self.database:query( deleteSql )
     sqlQuery.onError = function( _ , err )
-        nstack.core.log.error( "services :: database :: orm" , "Query failed: " .. err )
+        nstack.core.log.error( "infra :: database :: orm" , "Query failed: " .. err )
     end
     sqlQuery:start()
     sqlQuery:wait()

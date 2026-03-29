@@ -1,5 +1,4 @@
-local ORM = nstack.services[ "database" ].orm
-
+local ORM = nstack.infra.database.orm
 
 ---@class Attribute
 ORM.Attribute = Class()
