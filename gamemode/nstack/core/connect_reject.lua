@@ -9,8 +9,8 @@ hook.Add( "CheckPassword" , "nstack.core.connect_reject" , function( steamid64 ,
         return false , "[nstack]: Server is still starting, try again later..."
     end
 
-    if nstack.core.identity.settings.maintenance and nstack.core.identity.settings.maintenance.active then
-        if not table.HasValue( nstack.core.identity.settings.maintenance.whitelist , tostring( steamid64 ) ) then
+    if nstack.core.global_settings.maintenance and nstack.core.global_settings.maintenance.active then
+        if not table.HasValue( nstack.core.global_settings.maintenance.whitelist , tostring( steamid64 ) ) then
             nstack.core.log.warn( "core :: connect-reject" , "Player " .. name .. " tried to connect while server is in maintenance mode, rejecting connection..." )
             return false , "[nstack]: Server is in maintenance mode!"
         end

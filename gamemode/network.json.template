@@ -1,0 +1,51 @@
+{
+    "global_settings": {
+        "maintenance": {
+            "active": true,
+            "whitelist": [
+                "STEAM_ID64"
+            ]
+        },
+
+        "database": {
+            "host": "",
+            "port": 0000,
+            "user": "",
+            "pass": "",
+            "name": ""
+        },
+
+        "websocket": {
+            "host": "0.0.0.0",
+            "port": 000000
+        }
+    },
+
+
+    
+    "servers": {
+        "sv-1": {
+            "name": "server 1",
+            "host": "0.0.0.0",
+            "port": 000000,
+            "settings": {
+                "websocket_key": "WEBSOCKET_KEY"
+            },
+            "modules": {
+                
+            }
+        },
+
+        "sv-2": {
+            "name": "server 2",
+            "host": "0.0.0.0",
+            "port": 000000,
+            "settings": {
+                "websocket_key": "WEBSOCKET_KEY"
+            },
+            "modules": {
+                
+            }
+        }
+    }
+}
