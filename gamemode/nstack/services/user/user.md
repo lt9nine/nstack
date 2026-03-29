@@ -66,6 +66,58 @@ Returns `true` if the player is online on **this** server specifically.
 if nstack.services[ "user" ].isLocal( player:SteamID64() ) then ... end
 ```
 
+### `getPlayerCount( server_id )`
+Returns the number of players currently online on the given server.
+
+```lua
+local count = nstack.services[ "user" ].getPlayerCount( "main" )
+```
+
+### `getGlobalPlayerCount()`
+Returns the total number of players online across the entire network.
+
+```lua
+local total = nstack.services[ "user" ].getGlobalPlayerCount()
+```
+
+### `getPlayerList( server_id )`
+Returns a sequential table of user data objects for all players on the given server.
+
+```lua
+local players = nstack.services[ "user" ].getPlayerList( "main" )
+for _ , user in ipairs( players ) do
+    print( user.name )
+end
+```
+
+### `getGlobalPlayerList()`
+Returns a sequential table of user data objects for all players online on the network.
+
+```lua
+local players = nstack.services[ "user" ].getGlobalPlayerList()
+for _ , user in ipairs( players ) do
+    print( user.name , user.steamid64 )
+end
+```
+
+---
+
+## Timers
+
+| Name | Interval | Description |
+|---|---|---|
+| `nstack.services.user.playtimeFlush` | 600 s | Writes accumulated playtime for all local players to the DB |
+
+### Playtime flush
+
+Every 10 minutes `flushPlaytime()` iterates the local cache and, for each
+player whose `joinTime` is set (i.e. connected to **this** server), computes
+the elapsed time since the last checkpoint, adds it to `entry.data.playtime`,
+persists the new value to the database, then resets `joinTime` to `now`.
+
+This means `onLeave` and subsequent flush ticks always operate on the time
+since the last checkpoint only — no double-counting occurs.
+
 ---
 
 ## Hooks Listened

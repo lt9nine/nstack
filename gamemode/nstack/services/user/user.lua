@@ -37,6 +37,8 @@ function service._init()
         service.onWsConnected()
     end
 
+    timer.Create( "nstack.services.user.playtimeFlush" , 600 , 0 , service.flushPlaytime )
+
     nstack.core.log.info( "services :: user" , "started" )
 end
 
@@ -148,6 +150,22 @@ function service.onLeave( player )
     end
 end
 
+-- Persists accumulated playtime for all local players and resets their joinTime checkpoint.
+-- Called every 10 minutes. Ensures playtime is not lost if the server crashes.
+function service.flushPlaytime()
+    local now = os.time()
+    for steamid64 , entry in pairs( service.cache ) do
+        if entry.joinTime then
+            local elapsed          = now - entry.joinTime
+            entry.data.playtime    = entry.data.playtime + elapsed
+            entry.joinTime         = now
+
+            User:update( { playtime = entry.data.playtime } ):where( { steamid64 = steamid64 } ):run()
+        end
+    end
+    nstack.core.log.debug( "services :: user" , "playtime flushed" )
+end
+
 -- Returns the cached user data table for a given steamid64, or nil if not online anywhere.
 function service.getUser( steamid64 )
     local entry = service.cache[ steamid64 ]
@@ -164,4 +182,40 @@ end
 function service.isLocal( steamid64 )
     local entry = service.cache[ steamid64 ]
     return entry ~= nil and entry.server == nstack.core.identity.id
+end
+
+-- Returns the number of players currently online on the given server.
+function service.getPlayerCount( server_id )
+    local count = 0
+    for _ , entry in pairs( service.cache ) do
+        if entry.server == server_id then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+-- Returns the total number of players online across the entire network.
+function service.getGlobalPlayerCount()
+    return table.Count( service.cache )
+end
+
+-- Returns a table of user data objects for all players on the given server.
+function service.getPlayerList( server_id )
+    local list = {}
+    for _ , entry in pairs( service.cache ) do
+        if entry.server == server_id then
+            list[ #list + 1 ] = entry.data
+        end
+    end
+    return list
+end
+
+-- Returns a table of user data objects for all players online on the network.
+function service.getGlobalPlayerList()
+    local list = {}
+    for _ , entry in pairs( service.cache ) do
+        list[ #list + 1 ] = entry.data
+    end
+    return list
 end
