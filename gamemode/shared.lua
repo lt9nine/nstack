@@ -50,6 +50,8 @@ function nstack.core.initialize()
             end
         end
     end
+
+    hook.Run( "NStack.Initialized" )
 end
 
 if CLIENT then nstack.core.initialize() end
