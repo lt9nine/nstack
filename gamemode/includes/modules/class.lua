@@ -1,3 +1,5 @@
+AddCSLuaFile()
+
 local function new( class , ... )
     local instance = setmetatable( {} , class )
 
