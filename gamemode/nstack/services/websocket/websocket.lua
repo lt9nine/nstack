@@ -43,6 +43,7 @@ function service._init()
             key       = key ,
         } ) )
 
+        hook.Run( "NStack.Services.Websocket.Connected" )
         nstack.core.log.info( "services :: " .. service.name , "authenticated as '" .. server_id .. "'" )
     end
 
@@ -56,30 +57,30 @@ function service._init()
 
         nstack.core.log.trace( "services :: " .. service.name , "message received, type: " .. tostring( msg.type ) )
 
-        hook.Run( "NStack:WebSocket:Message" , msg )
+        hook.Run( "NStack.Services.WebSocket.Message" , msg )
 
         if msg.type == "broadcast" then
-            hook.Run( "NStack:WebSocket:Broadcast" , msg )
+            hook.Run( "NStack.Services.WebSocket.Broadcast" , msg )
         elseif msg.type == "direct" then
-            hook.Run( "NStack:WebSocket:Direct" , msg )
+            hook.Run( "NStack.Services.WebSocket.Direct" , msg )
         elseif msg.type == "rpc" then
-            hook.Run( "NStack:WebSocket:RPC" , msg )
+            hook.Run( "NStack.Services.WebSocket.RPC" , msg )
         elseif msg.type == "rpc_response" then
-            hook.Run( "NStack:WebSocket:RPCResponse" , msg )
+            hook.Run( "NStack.Services.WebSocket.RPCResponse" , msg )
         end
     end
 
     function ws.onDisconnected()
         nstack.core.log.warn( "services :: " .. service.name , "disconnected" )
         nstack.services[ "websocket" ].status = "stopped"
-        hook.Run( "NStack:WebSocket:Disconnected" )
+        hook.Run( "NStack.Services.WebSocket.Disconnected" )
     end
 
     function ws.onError( socketOrMsg , msg )
         removeInitBot()
         local errMsg = type( socketOrMsg ) == "string" and socketOrMsg or tostring( msg )
         nstack.core.log.error( "services :: " .. service.name , "error: " .. errMsg )
-        hook.Run( "NStack:WebSocket:Error" , errMsg )
+        hook.Run( "NStack.Services.WebSocket.Error" , errMsg )
     end
 
     nstack.core.log.debug( "services :: " .. service.name , "opening connection..." )
