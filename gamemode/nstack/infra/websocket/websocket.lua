@@ -53,7 +53,7 @@ function ws._init( settings )
     end
 
     function socket.onMessage( data )
-        local msg = util.JSONToTable( data )
+        local msg = type( data ) == "string" and util.JSONToTable( data ) or data
 
         if not msg then
             nstack.core.log.warn( "infra :: websocket" , "received invalid JSON: " .. tostring( data ) )
