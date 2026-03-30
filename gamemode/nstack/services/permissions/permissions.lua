@@ -95,6 +95,34 @@ function service.getAdditionals( steamid64 )
     return entry and entry.additionals or {}
 end
 
+-- Returns the full combined permission list for the given steamid64:
+-- all inherited group permissions followed by per-player additionals, deduplicated.
+function service.getPermissions( steamid64 )
+    local entry       = service.cache[ steamid64 ]
+    local usergroup   = entry and entry.usergroup   or service.defaultGroup
+    local additionals = entry and entry.additionals or {}
+
+    local seen        = {}
+    local permissions = {}
+
+    local function _add( perm )
+        if ( not seen[ perm ] ) then
+            seen[ perm ]                   = true
+            permissions[ #permissions + 1 ] = perm
+        end
+    end
+
+    for _ , perm in ipairs( _resolveGroupPermissions( usergroup ) ) do
+        _add( perm )
+    end
+
+    for _ , perm in ipairs( additionals ) do
+        _add( perm )
+    end
+
+    return permissions
+end
+
 function service._init()
     nstack.core.log.info( "services :: permissions" , "starting..." )
 

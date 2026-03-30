@@ -115,6 +115,18 @@ for _ , perm in ipairs( extras ) do
 end
 ```
 
+### `getPermissions( steamid64 )`
+Returns a sequential table of all permissions the player holds — the full
+inherited group chain followed by their per-player additionals.
+Falls back to `defaultGroup` if the player is not in the cache.
+
+```lua
+local perms = nstack.services[ "permissions" ].getPermissions( player:SteamID64() )
+for _ , perm in ipairs( perms ) do
+    print( perm )
+end
+```
+
 ### `setGroup( steamid64, groupName )`
 Assigns a new usergroup to the player and persists it to the database immediately.
 Also updates the in-memory cache if the player is currently online.
