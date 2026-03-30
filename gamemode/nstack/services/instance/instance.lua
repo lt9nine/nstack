@@ -174,8 +174,12 @@ function service._init()
         end )
     end )
 
-    hook.Add( "PlayerCanSeePlayersChat" , "nstack.service.instance.noChat" , function( _ , _ , receiver , sender )
-        if ( receiver:getEntityInstance() ~= sender:getEntityInstance() ) then return false end
+    hook.Add( "nstack.service.chat.ready" , "nstack.service.instance.registerChatFilter" , function( chatService )
+        chatService.addFilter( "instance" , function( receiver , sender , text , channel )
+            if ( channel and channel.isDirect ) then return nil end
+            if ( not IsValid( sender ) ) then return nil end
+            if ( receiver:getEntityInstance() ~= sender:getEntityInstance() ) then return false end
+        end )
     end )
 
     hook.Add( "CanTool" , "nstack.service.instance.noTool" , function( ply , trace )
