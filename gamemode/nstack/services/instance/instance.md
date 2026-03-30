@@ -108,7 +108,7 @@ all reads.
 | `PlayerSpawnedEffect`, `PlayerSpawnedProp`, `PlayerSpawnedRagdoll` | `nstack.service.instance.inheritInstance` | Assigns the spawned entity to the spawning player's instance |
 | `PlayerSpawnedNPC`, `PlayerSpawnedSENT`, `PlayerSpawnedSWEP`, `PlayerSpawnedVehicle` | `nstack.service.instance.inheritInstance` | Assigns the spawned entity to the spawning player's instance |
 | `PhysgunPickup`, `AllowPlayerPickup`, `GravGunPickupAllowed`, `PlayerCanPickupWeapon`, `PlayerCanPickupItem`, `CanPlayerUnfreeze` | `nstack.service.instance.noInteraction` | Blocks pickup and interaction across instances |
-| `PlayerCanHearPlayersVoice` | `nstack.service.instance.noVoice` | Blocks voice between players in different instances |
+| `nstack.service.voice.ready` | `nstack.service.instance.registerVoiceRule` | Registers an instance voice rule with the voice service (priority 10) when available |
 | `PlayerCanSeePlayersChat` | `nstack.service.instance.noChat` | Blocks chat visibility between players in different instances |
 | `CanTool` | `nstack.service.instance.noTool` | Blocks tool use on entities in a different instance |
 | `ShouldCollide` | `nstack.service.instance.noCollide` | Prevents physics collision between entities in different instances |

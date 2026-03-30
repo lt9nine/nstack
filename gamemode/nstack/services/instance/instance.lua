@@ -167,8 +167,11 @@ function service._init()
         end )
     end
 
-    hook.Add( "PlayerCanHearPlayersVoice" , "nstack.service.instance.noVoice" , function( receiver , sender )
-        if ( receiver:getEntityInstance() ~= sender:getEntityInstance() ) then return false end
+    hook.Add( "nstack.service.voice.ready" , "nstack.service.instance.registerVoiceRule" , function( voiceService )
+        voiceService.addRule( "instance" , 10 , function( receiver , sender )
+            if ( receiver:getEntityInstance() ~= sender:getEntityInstance() ) then return false end
+            return nil
+        end )
     end )
 
     hook.Add( "PlayerCanSeePlayersChat" , "nstack.service.instance.noChat" , function( _ , _ , receiver , sender )
