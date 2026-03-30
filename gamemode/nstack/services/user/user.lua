@@ -39,6 +39,7 @@ function service._init()
 
     timer.Create( "nstack.services.user.playtimeFlush" , 600 , 0 , service.flushPlaytime )
 
+    service.status = "running"
     nstack.core.log.info( "services :: user" , "started" )
 end
 

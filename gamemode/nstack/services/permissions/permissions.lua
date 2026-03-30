@@ -136,5 +136,6 @@ function service._init()
     hook.Add( "PlayerInitialSpawn" , "nstack.services.permissions.onJoin"  , service._onJoin )
     hook.Add( "PlayerDisconnected" , "nstack.services.permissions.onLeave" , service._onLeave )
 
+    service.status = "running"
     nstack.core.log.info( "services :: permissions" , "started" )
 end

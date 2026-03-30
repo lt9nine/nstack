@@ -185,5 +185,6 @@ function service._init()
         if ( ent1:getEntityInstance() ~= ent2:getEntityInstance() ) then return false end
     end )
 
+    service.status = "running"
     nstack.core.log.info( "services :: instance" , "started" )
 end
