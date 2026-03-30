@@ -172,6 +172,10 @@ function service._onPlayerSay( sender , text , teamOnly )
 
     if ( not claimedChannel ) then return end
 
+    if ( claimedChannel.onClaim ) then
+        claimedChannel.onClaim( sender , text )
+    end
+
     service._deliver( sender , text , claimedChannel , nil , nil )
 
     return false

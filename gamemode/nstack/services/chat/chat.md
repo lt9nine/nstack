@@ -142,6 +142,19 @@ Called once per message to determine if this channel owns it.
 The first channel (by priority) that returns `true` claims the message.
 All other channels are skipped.
 
+### `onClaim( sender, text )` *(optional)*
+
+Called immediately after a channel claims a message, before delivery runs.
+Use this to execute logic (commands, logging, side effects) without interfering
+with the delivery pipeline. If `canReceive` always returns `false`, the message
+is fully consumed with no visible output — this is the command channel pattern.
+
+```lua
+onClaim = function( sender , text )
+    -- parse and dispatch command
+end ,
+```
+
 ### `canReceive( receiver, sender, text )`
 
 Called per player to determine if they receive the message.
