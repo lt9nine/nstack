@@ -7,7 +7,14 @@ function nstack.services.register( service )
         if table.Count( service.files ) > 0 then
             if service.environment then
                 for _ , fileEntry in ipairs( service.files ) do
-                    if fileEntry.environment ~= service.environment then
+                    local isCompatible = false
+                    if ( service.environment == "shared" ) then
+                        isCompatible = fileEntry.environment == "server" or fileEntry.environment == "client" or fileEntry.environment == "shared"
+                    else
+                        isCompatible = fileEntry.environment == service.environment
+                    end
+
+                    if ( not isCompatible ) then
                         nstack.core.log.error( "services" , "service " .. service.name .. " is environment '" .. service.environment .. "' but file '" .. ( fileEntry.file or "?" ) .. "' has environment '" .. ( fileEntry.environment or "?" ) .. "', skipping..." )
                         return false
                     end
